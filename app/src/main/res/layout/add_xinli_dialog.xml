@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ffffff"
+    android:orientation="vertical"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="节日名:"
+            android:textSize="21sp" />
+
+        <EditText
+            android:id="@+id/festival_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="21sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="日期:"
+            android:textSize="21sp" />
+
+        <TextView
+            android:id="@+id/festival_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="xxxx年xx月xx日"
+            android:textSize="21sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" 
+        android:gravity="right">
+
+        <CheckBox
+            android:id="@+id/anniversary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="周年" />
+
+        <Button
+            android:id="@+id/pickDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="选择日期" />
+    </LinearLayout>
+
+</LinearLayout>
