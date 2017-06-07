@@ -430,8 +430,8 @@ public class ChinaDate {
                     23846845.20, 25152606.00, 26447687.40, 27733451.40, 29011921.20, 30285477.60
             };
 
-    private static double s_stAccInfo2[] = {
-            1271448,
+    private static double s_stAccInfo2[] = {//与上个节气的时间差，单位秒
+            1271448,//小寒
             1272494.4,
             1275526.2,
             1282123.2,

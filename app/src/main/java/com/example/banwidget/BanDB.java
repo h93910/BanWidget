@@ -33,9 +33,6 @@ public class BanDB extends SQLiteOpenHelper {
 
     /**
      * 取得全部农历节日信息
-     *
-     * @param NongLiDate
-     * @return
      */
     public ArrayList<String> getAllNongLiFestivalInfo() {
         ArrayList<String> nongLiFestivalInfo = new ArrayList<String>();
@@ -65,7 +62,6 @@ public class BanDB extends SQLiteOpenHelper {
     /**
      * 取得全部新历节日信息
      *
-     * @param NongLiDate
      * @return
      */
     public ArrayList<String> getAllXinLiFestivalInfo() {
@@ -137,22 +133,23 @@ public class BanDB extends SQLiteOpenHelper {
      *
      * @return
      */
-    public String getNongLiFestivalName(String NongLiDate) {
-        String name = "";
+    public ArrayList<String> getNongLiFestivalName(String NongLiDate) {
+        ArrayList<String> names = new ArrayList<String>();
         System.out.println("今天:" + NongLiDate);
 
         Cursor cursor = database.query("nongli_info",
                 new String[]{"festival_name"}, "festival_date=?",
                 new String[]{NongLiDate}, null, null, null);
         if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                name = cursor.getString(cursor.getColumnIndex("festival_name"));
-                Log.v("读取到农历节目", name);
+            while (cursor.moveToNext()) {
+                String temp = cursor.getString(cursor.getColumnIndex("festival_name"));
+                names.add(temp);
+                Log.v("读取到农历节目", temp);
             }
         } else {
             Log.v("查询到农历节目", "无");
         }
-        return name;
+        return names;
     }
 
     /**
@@ -160,15 +157,15 @@ public class BanDB extends SQLiteOpenHelper {
      *
      * @return
      */
-    public String getXinLiFestivalName(String xinLiDate) {
-        String name = "";
+    public ArrayList<String> getXinLiFestivalName(String xinLiDate) {
+        ArrayList<String> names = new ArrayList<String>();
         System.out.println("今天:" + xinLiDate);
         Cursor cursor = database.query("xinli_info", new String[]{
                         "festival_name", "festival_start"}, "festival_date=?",
                 new String[]{xinLiDate}, null, null, null);
         if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                name = cursor.getString(cursor.getColumnIndex("festival_name"));
+            while (cursor.moveToNext()) {
+                String nameTemp = cursor.getString(cursor.getColumnIndex("festival_name"));
                 int start = cursor.getInt(cursor
                         .getColumnIndex("festival_start"));
 
@@ -177,14 +174,15 @@ public class BanDB extends SQLiteOpenHelper {
                     Log.e("start", start + "");
                     Log.e("disparity", disparity + "");
                     if (disparity != 0) {
-                        name += disparity + "周年";
+                        nameTemp += disparity + "周年";
                     }
                 }
 
-                Log.v("单独读取到新历节目", name);
+                Log.v("单独读取到新历节目", nameTemp);
+                names.add(nameTemp);
             }
         }
-        return name;
+        return names;
     }
 
     /**

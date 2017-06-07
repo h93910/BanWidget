@@ -6,7 +6,7 @@
     <string name="hello_world">Hello world!</string>
     <string name="update_title">更新日志</string>
     <string name="update_date">
-        2017.06.05\n加入节气，更新日志\n更换数据库存储位置\n2015.12.18\n完成基本功能：可增加新历农历特殊节日\n2015.10.19\n建立工程
+        2017.06.07\n修改桌面插件样式\n支持新农历节日同一天节目显示\n2017.06.05\n加入节气，更新日志\n更换数据库存储位置\n2015.12.18\n完成基本功能：可增加新历农历特殊节日\n2015.10.19\n建立工程
     </string>
 
 </resources>
