@@ -1,12 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="app_name">BanWidget</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="update_title">更新日志</string>
+    <string name="permission_rationale">Dear Customer we need get your phone number,position, stock space,contacts for your safety using.</string>
     <string name="update_date">
-        2017.06.07\n修改桌面插件样式\n支持新农历节日同一天节目显示\n2017.06.05\n加入节气，更新日志\n更换数据库存储位置\n2015.12.18\n完成基本功能：可增加新历农历特殊节日\n2015.10.19\n建立工程
+         2018.01.09\n完成主页记事checkBox功能\n2018.01.08\n添加网络变化时的侦听，用于刷新天气\n添加所需权限提示\n2018.01.05\n添加主页列表切换动画\n2018.01.02\n初步完成天气预报功能\n完善数据库连接\n2017.12.28\n重制新增节日界面、对话框，统一使用新样式\n2017.12.27\n调整工程结构为Android Studio样式目录\n目标编译语言改为JAVA 1.8\n2017.12.26\n开始使用Android Material Design\n桌面微件尺寸改为5x1\n2017.06.07\n修改桌面插件样式\n支持新农历节日同一天节目显示\n2017.06.05\n加入节气，更新日志\n更换数据库存储位置\n2015.12.18\n完成基本功能：可增加新历农历特殊节日\n2015.10.19\n建立工程
     </string>
 
+    　　
+    <string-array name="week">
+        <item>星期日</item>
+        <item>星期一</item>
+        <item>星期二</item>
+        <item>星期三</item>
+        <item>星期四</item>
+        <item>星期五</item>
+        <item>星期六</item>
+    </string-array>
 </resources>

@@ -5,17 +5,17 @@
     android:background="#ffffff"
     android:orientation="vertical"
     android:paddingLeft="10dp"
-    android:paddingRight="10dp" >
+    android:paddingRight="10dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal" >
+        android:orientation="horizontal">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="节日名:"
+            android:text="节日名："
             android:textSize="21sp" />
 
         <EditText
@@ -28,45 +28,41 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal" >
-
-        <Spinner
-            android:id="@+id/specific_month"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+        android:orientation="horizontal">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="月的" />
+            android:text="日期："
+            android:textSize="21sp" />
+
+        <TextView
+            android:id="@+id/festival_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="xxxx年xx月xx日"
+            android:textSize="21sp" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal" >
+        android:gravity="right"
+        android:orientation="horizontal">
 
-        <TextView
+        <CheckBox
+            android:id="@+id/anniversary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="第" />
+            android:layout_marginEnd="10dp"
+            android:layout_marginRight="10dp"
+            android:text="周年" />
 
-        <Spinner
-            android:id="@+id/specific_order"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <TextView
+        <Button
+            android:id="@+id/pickDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="个星期" />
-
-        <Spinner
-            android:id="@+id/specific_week"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:text="选择日期" />
     </LinearLayout>
 
 </LinearLayout>

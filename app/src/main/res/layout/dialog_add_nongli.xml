@@ -5,17 +5,17 @@
     android:background="#ffffff"
     android:orientation="vertical"
     android:paddingLeft="10dp"
-    android:paddingRight="10dp" >
+    android:paddingRight="10dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal" >
+        android:orientation="horizontal">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="节日名:"
+            android:text="节日名："
             android:textSize="21sp" />
 
         <EditText
@@ -28,12 +28,12 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal" >
+        android:orientation="horizontal">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="日期:"
+            android:text="日期："
             android:textSize="21sp" />
 
         <TextView
@@ -47,8 +47,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
         android:gravity="center_horizontal"
-        android:orientation="horizontal" >
+        android:orientation="horizontal">
 
         <CheckBox
             android:id="@+id/anniversary"
@@ -61,18 +62,20 @@
             android:layout_width="65dp"
             android:layout_height="wrap_content"
             android:hint="年"
-            android:text="2000"
             android:inputType="numberSigned"
             android:maxLength="4"
+            android:text="2000"
             android:visibility="gone" />
 
-        <Spinner
+        <android.support.v7.widget.AppCompatSpinner
             android:id="@+id/nongli_month"
+            style="@style/MySpinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
-        <Spinner
+        <android.support.v7.widget.AppCompatSpinner
             android:id="@+id/nongli_day"
+            style="@style/MySpinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>

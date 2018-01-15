@@ -3,18 +3,38 @@
     android:id="@+id/open"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
+    android:background="@drawable/bg"
     android:gravity="center"
-    android:padding="5dp"
-    android:background="@drawable/bg">
+    android:orientation="vertical"
+    android:padding="5dp">
 
-    <TextView
-        android:id="@+id/dongli_text"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="农历"
-        android:textColor="#ffffff"
-        android:textSize="18sp" />
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/dongli_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="农历"
+            android:textColor="#ffffff"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/weather_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="天气无数据"
+            android:textColor="#ffffff" />
+
+        <Button
+            android:id="@+id/check"
+            android:background="@drawable/ic_check_box_black_24dp"
+            android:layout_width="25dp"
+            android:layout_height="25dp" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/jieri_text"

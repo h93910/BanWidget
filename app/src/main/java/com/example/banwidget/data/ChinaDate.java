@@ -1,4 +1,4 @@
-package com.example.banwidget;
+package com.example.banwidget.data;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -488,6 +488,13 @@ public class ChinaDate {
         }
     }
 
+    /**
+     * 是否是同一天
+     *
+     * @param calendar
+     * @param calendar2
+     * @return
+     */
     private static boolean isSomeDay(Calendar calendar, Calendar calendar2) {
         return calendar.get(Calendar.YEAR) == calendar2.get(Calendar.YEAR) &&
                 calendar.get(Calendar.MONTH) == calendar2.get(Calendar.MONTH) &&

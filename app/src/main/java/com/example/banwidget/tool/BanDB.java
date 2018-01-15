@@ -1,23 +1,23 @@
-package com.example.banwidget;
-
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+package com.example.banwidget.tool;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Environment;
 import android.util.Log;
+
+import com.example.banwidget.data.ChinaDate;
+
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Date;
 
 public class BanDB extends SQLiteOpenHelper {
     SQLiteDatabase database;
 
     public BanDB(Context context) {
-        super(context, Environment.getExternalStorageDirectory().getAbsolutePath() + "/Ban/ban.db", null, 1);
+        super(context, FileHelper.getInstance(context, "/Ban").getAbsoluteFilePath("ban.db"), null, 1);
         database = getReadableDatabase();
         createTable();
     }
@@ -29,6 +29,10 @@ public class BanDB extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
+    }
+
+    public void onDestory() {
+        database.close();
     }
 
     /**
@@ -55,6 +59,7 @@ public class BanDB extends SQLiteOpenHelper {
                 }
                 Log.v("读取到农历节目", date + "\t" + name);
             }
+            cursor.close();
         }
         return nongLiFestivalInfo;
     }
@@ -92,6 +97,7 @@ public class BanDB extends SQLiteOpenHelper {
                 }
                 Log.v("读取到新历节目", date + "\t" + name);
             }
+            cursor.close();
         }
         return xinLiFestivalInfo;
     }
@@ -124,6 +130,7 @@ public class BanDB extends SQLiteOpenHelper {
                 specificFestivalInfo.add(data);
                 Log.v("读取到特殊节目", data);
             }
+            cursor.close();
         }
         return specificFestivalInfo;
     }
@@ -146,6 +153,7 @@ public class BanDB extends SQLiteOpenHelper {
                 names.add(temp);
                 Log.v("读取到农历节目", temp);
             }
+            cursor.close();
         } else {
             Log.v("查询到农历节目", "无");
         }
@@ -181,6 +189,7 @@ public class BanDB extends SQLiteOpenHelper {
                 Log.v("单独读取到新历节目", nameTemp);
                 names.add(nameTemp);
             }
+            cursor.close();
         }
         return names;
     }
@@ -209,6 +218,7 @@ public class BanDB extends SQLiteOpenHelper {
 
                 Log.v("单独读取特殊节目", name);
             }
+            cursor.close();
         }
         return name;
     }

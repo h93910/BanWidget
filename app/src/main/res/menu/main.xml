@@ -10,7 +10,13 @@
         android:id="@+id/specific"
         android:title="特殊" />
     <item
+        android:id="@+id/weather_city"
+        android:title="天气城市设置" />
+    <item
         android:id="@+id/update"
         android:title="更新日志" />
+    <!--<item-->
+    <!--android:id="@+id/test"-->
+    <!--android:title="test" />-->
 
 </menu>

@@ -1,51 +1,60 @@
 package com.example.banwidget;
 
-import java.util.ArrayList;
-
-import android.R.integer;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
-import android.app.DatePickerDialog.OnDateSetListener;
 import android.content.Context;
-import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatSpinner;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
-import android.view.View.OnFocusChangeListener;
-import android.view.View.OnLongClickListener;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
-import android.widget.ListView;
-import android.widget.Spinner;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.banwidget.R;
+import com.example.banwidget.data.ChinaDate;
+import com.example.banwidget.data.Weather_sojson;
+import com.example.banwidget.tool.BanDB;
 
-public class MainActivity extends Activity {
-    private TextView textView;// 标题
+import java.util.ArrayList;
+
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+
+public class MainActivity extends AppCompatActivity {
     private TextView dateView;// 选日期的显示文本
     private TextView nameView;// 节日的名字
-    private ListView listView;
+    private RecyclerView listView;
     private TextView nongliYear;
-    private Spinner nongliMonth;
-    private Spinner nongliDay;
-    private Spinner specicalMonth;
-    private Spinner specicalOrder;
-    private Spinner specicalWeek;
-    private Button button;// 新增节日按钮
+    private AppCompatSpinner nongliMonth;
+    private AppCompatSpinner nongliDay;
+    private AppCompatSpinner specicalMonth;
+    private AppCompatSpinner specicalOrder;
+    private AppCompatSpinner specicalWeek;
+    private FloatingActionButton button;// 新增节日按钮
+    private CollapsingToolbarLayout toolbarLayout;
     private MyDatePickerDialog datePickerDialog;
     private AlertDialog.Builder builder;
     private AlertDialog.Builder builder2;
@@ -87,14 +96,41 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        db = new BanDB(this);
+        if (mayRequestPermission()) {
+            setContentView(R.layout.activity_main);
+            db = new BanDB(this);
 
-        initView();
-        initListener();
+            initView();
+            initListener();
 
-        loadXinLiData();
-        ChinaDate.getJieQi();
+            loadXinLiData();
+            ChinaDate.getJieQi();
+            initDate();
+        }
+    }
+
+    private String softVersion;//软件版本号
+
+    /**
+     * 初始化数据
+     */
+    private void initDate() {
+        PackageManager pm = getApplicationContext().getPackageManager();
+        PackageInfo pi;
+        try {
+            pi = pm.getPackageInfo(getApplicationContext().getPackageName(), 0);
+            softVersion = pi.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (db != null)
+            db.onDestory();
+        super.onDestroy();
     }
 
     private OnClickListener xinLiListener;
@@ -103,57 +139,27 @@ public class MainActivity extends Activity {
 
     private void initListener() {
         // 新历增加按钮的侦听
-        xinLiListener = new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                xinLiDialogView = getLayoutInflater().inflate(
-                        R.layout.add_xinli_dialog, null);
-                final CheckBox checkBox = (CheckBox) xinLiDialogView
-                        .findViewById(R.id.anniversary);
-                nameView = (TextView) xinLiDialogView
-                        .findViewById(R.id.festival_name);
-                dateView = (TextView) xinLiDialogView
-                        .findViewById(R.id.festival_date);
+        xinLiListener = (View v) -> {
+            xinLiDialogView = getLayoutInflater().inflate(R.layout.dialog_add_xinli, null);
+            final CheckBox checkBox = (CheckBox) xinLiDialogView.findViewById(R.id.anniversary);
+            nameView = (TextView) xinLiDialogView.findViewById(R.id.festival_name);
+            dateView = (TextView) xinLiDialogView.findViewById(R.id.festival_date);
 
-                checkBox.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        anniversary = checkBox.isChecked();
-                    }
-                });
-                xinLiDialogView.findViewById(R.id.pickDate).setOnClickListener(
-                        new OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                datePickerDialog.show();
-                            }
-                        });
-                builder = new AlertDialog.Builder(activity);
-                builder.setView(xinLiDialogView)
-                        .setTitle("新增新历节日")
-                        .setNegativeButton("取消", null)
-                        .setPositiveButton("确定",
-                                new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog,
-                                                        int which) {
-                                        if (db.insertXinLiFestival(nameView
-                                                        .getText().toString().trim(),
-                                                month, day, yearN)) {
-                                            initList();
-                                            Toast.makeText(
-                                                    getApplicationContext(),
-                                                    "添加成功", Toast.LENGTH_SHORT)
-                                                    .show();
-                                        } else {
-                                            Toast.makeText(
-                                                    getApplicationContext(),
-                                                    "添加新历节日失败",
-                                                    Toast.LENGTH_SHORT).show();
-                                        }
-                                    }
-                                }).show();
-            }
+            checkBox.setOnClickListener(v1 -> anniversary = checkBox.isChecked());
+            xinLiDialogView.findViewById(R.id.pickDate).setOnClickListener(v12 -> datePickerDialog.show());
+            builder = new AlertDialog.Builder(activity);
+            builder.setView(xinLiDialogView)
+                    .setTitle("新增新历节日")
+                    .setNegativeButton("取消", null)
+                    .setPositiveButton("确定",
+                            (dialog, which) -> {
+                                if (db.insertXinLiFestival(nameView.getText().toString().trim(), month, day, yearN)) {
+                                    initList();
+                                    Toast.makeText(getApplicationContext(), "添加成功", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(getApplicationContext(), "添加新历节日失败", Toast.LENGTH_SHORT).show();
+                                }
+                            }).show();
         };
 
         // 农历增加按钮的侦听
@@ -162,143 +168,102 @@ public class MainActivity extends Activity {
 
             @Override
             public void onClick(View v) {
-                nongLiDialogView = getLayoutInflater().inflate(
-                        R.layout.add_nongli_dialog, null);
+                nongLiDialogView = getLayoutInflater().inflate(R.layout.dialog_add_nongli, null);
 
-                checkBox = (CheckBox) nongLiDialogView
-                        .findViewById(R.id.anniversary);
-                nameView = (TextView) nongLiDialogView
-                        .findViewById(R.id.festival_name);
-                dateView = (TextView) nongLiDialogView
-                        .findViewById(R.id.festival_date);
+                checkBox = (CheckBox) nongLiDialogView.findViewById(R.id.anniversary);
+                nameView = (TextView) nongLiDialogView.findViewById(R.id.festival_name);
+                dateView = (TextView) nongLiDialogView.findViewById(R.id.festival_date);
 
-                nongliYear = (TextView) nongLiDialogView
-                        .findViewById(R.id.nongli_year);
-                nongliMonth = (Spinner) nongLiDialogView
-                        .findViewById(R.id.nongli_month);
-                nongliDay = (Spinner) nongLiDialogView
-                        .findViewById(R.id.nongli_day);
+                nongliYear = (TextView) nongLiDialogView.findViewById(R.id.nongli_year);
+                nongliMonth = (AppCompatSpinner) nongLiDialogView.findViewById(R.id.nongli_month);
+                nongliDay = (AppCompatSpinner) nongLiDialogView.findViewById(R.id.nongli_day);
 
-                nongliYear
-                        .setOnFocusChangeListener(new OnFocusChangeListener() {
-                            @Override
-                            public void onFocusChange(View v, boolean hasFocus) {
-                                setDateView();
-                            }
-                        });
-
-                checkBox.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        anniversary = checkBox.isChecked();
-                        if (anniversary) {
-                            nongliYear.setVisibility(View.VISIBLE);
-                        } else {
-                            nongliYear.setVisibility(View.GONE);
-                        }
+                nongliYear.setOnFocusChangeListener((v13, hasFocus) -> setDateView());
+                checkBox.setOnClickListener(v14 -> {
+                    anniversary = checkBox.isChecked();
+                    if (anniversary) {
+                        nongliYear.setVisibility(View.VISIBLE);
+                    } else {
+                        nongliYear.setVisibility(View.GONE);
                     }
                 });
 
-                ArrayList<String> monthdata = new ArrayList<String>();
+                ArrayList<String> monthdata = new ArrayList<>();
                 for (String s : nongliYue) {
                     monthdata.add(s);
                 }
 
                 // 农历月选择
-                ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-                        activity, android.R.layout.simple_spinner_item,
-                        monthdata);
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(activity, android.R.layout.simple_spinner_item, monthdata);
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 nongliMonth.setAdapter(adapter);
 
                 // 农历日选择
-                ArrayList<String> nognliDayDatas = new ArrayList<String>();
+                ArrayList<String> nognliDayDatas = new ArrayList<>();
                 for (String s : nongliRi) {
                     nognliDayDatas.add(s);
                 }
-                ArrayAdapter<String> adapter2 = new ArrayAdapter<String>(
-                        activity, android.R.layout.simple_spinner_item,
+                ArrayAdapter<String> adapter2 = new ArrayAdapter<>(activity, android.R.layout.simple_spinner_item,
                         nognliDayDatas);
                 adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 nongliDay.setAdapter(adapter2);
 
-                nongliMonth
-                        .setOnItemSelectedListener(new OnItemSelectedListener() {
-                            @Override
-                            public void onItemSelected(AdapterView<?> parent,
-                                                       View view, int position, long id) {
-                                month = position;
+                nongliMonth.setOnItemSelectedListener(new OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        month = position;
+                        setDateView();
+                    }
 
-                                setDateView();
-                            }
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+                    }
+                });
+                nongliDay.setOnItemSelectedListener(new OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        day = position + 1;
+                        setDateView();
+                    }
 
-                            @Override
-                            public void onNothingSelected(AdapterView<?> parent) {
-                            }
-                        });
-                nongliDay
-                        .setOnItemSelectedListener(new OnItemSelectedListener() {
-                            @Override
-                            public void onItemSelected(AdapterView<?> parent,
-                                                       View view, int position, long id) {
-                                day = position + 1;
-                                setDateView();
-                            }
-
-                            @Override
-                            public void onNothingSelected(AdapterView<?> parent) {
-                            }
-                        });
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+                    }
+                });
 
                 builder2 = new AlertDialog.Builder(activity);
                 builder2.setView(nongLiDialogView)
                         .setTitle("新增农历节日")
                         .setNegativeButton("取消", null)
-                        .setPositiveButton("确定",
-                                new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog,
-                                                        int which) {
-                                        if (nongliYear.getVisibility() == View.VISIBLE) {
-                                            if (nongliYear.getText().toString()
-                                                    .trim().equals("")) {
-                                                yearN = 0;
-                                            } else {
-                                                yearN = Integer
-                                                        .parseInt(nongliYear
-                                                                .getText()
-                                                                .toString()
-                                                                .trim());
-                                            }
-                                        }
-                                        if (nongliYear.getVisibility() == View.GONE) {
-                                            yearN = 0;
-                                        }
-
-                                        if (db.insertNongLiFestival(nameView
-                                                        .getText().toString().trim(),
-                                                month, day, yearN)) {
-                                            initList();
-                                            showShortMessage("添加成功");
-                                        } else {
-                                            showShortMessage("添加农历节日失败");
-                                        }
-                                    }
-                                }).show();
+                        .setPositiveButton("确定", (dialog, which) -> {
+                            if (nongliYear.getVisibility() == View.VISIBLE) {
+                                if (nongliYear.getText().toString().trim().equals("")) {
+                                    yearN = 0;
+                                } else {
+                                    yearN = Integer.parseInt(nongliYear.getText().toString().trim());
+                                }
+                            }
+                            if (nongliYear.getVisibility() == View.GONE) {
+                                yearN = 0;
+                            }
+                            if (db.insertNongLiFestival(nameView.getText().toString().trim(), month, day, yearN)) {
+                                initList();
+                                showShortMessage("添加成功");
+                            } else {
+                                showShortMessage("添加农历节日失败");
+                            }
+                        }).show();
             }
 
             private void setDateView() {
-                if (nongliYear.getText() == null
-                        || nongliYear.getText().toString().equals("")) {
+                if (nongliYear.getText() == null || nongliYear.getText().toString().equals("")) {
                     anniversary = false;
                     checkBox.setChecked(false);
                     nongliYear.setVisibility(View.GONE);
                 }
                 if (anniversary) {
-                    yearN = Integer.parseInt(nongliYear.getText().toString()
-                            .trim());
-                    dateView.setText(yearN + "年" + nongliYue[month]
-                            + nongliRi[day - 1]);
+                    yearN = Integer.parseInt(nongliYear.getText().toString().trim());
+                    dateView.setText(yearN + "年" + nongliYue[month] + nongliRi[day - 1]);
                 } else {
                     dateView.setText(nongliYue[month] + nongliRi[day - 1]);
                 }
@@ -306,147 +271,119 @@ public class MainActivity extends Activity {
         };
 
         // 特殊节日的侦听器
-        specificListener = new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                specificDialogView = getLayoutInflater().inflate(
-                        R.layout.add_specific_dialog, null);
-                nameView = (TextView) specificDialogView
-                        .findViewById(R.id.festival_name);
-                specicalMonth = (Spinner) specificDialogView
-                        .findViewById(R.id.specific_month);
-                specicalOrder = (Spinner) specificDialogView
-                        .findViewById(R.id.specific_order);
-                specicalWeek = (Spinner) specificDialogView
-                        .findViewById(R.id.specific_week);
-
-                // 月
-                final ArrayList<Integer> mondata = new ArrayList<Integer>();
-                for (int i = 1; i < 13; i++) {
-                    mondata.add(i);
-                }
-                ArrayAdapter<Integer> month = new ArrayAdapter<Integer>(
-                        activity, android.R.layout.simple_spinner_item, mondata);
-                month.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-                specicalMonth.setAdapter(month);
-                specicalMonth
-                        .setOnItemSelectedListener(new OnItemSelectedListener() {
-                            @Override
-                            public void onItemSelected(AdapterView<?> parent,
-                                                       View view, int position, long id) {
-                                smonth = position;
-                            }
-
-                            @Override
-                            public void onNothingSelected(AdapterView<?> parent) {
-                            }
-                        });
-
-                // 第几个星期X
-                final ArrayList<Integer> orderdata = new ArrayList<Integer>();
-                for (int i = 1; i < 6; i++) {
-                    orderdata.add(i);
-                }
-                ArrayAdapter<Integer> order = new ArrayAdapter<Integer>(
-                        activity, android.R.layout.simple_spinner_item,
-                        orderdata);
-                order.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-                specicalOrder.setAdapter(order);
-                specicalOrder
-                        .setOnItemSelectedListener(new OnItemSelectedListener() {
-                            @Override
-                            public void onItemSelected(AdapterView<?> parent,
-                                                       View view, int position, long id) {
-                                sorder = orderdata.get(position);
-                            }
-
-                            @Override
-                            public void onNothingSelected(AdapterView<?> parent) {
-                            }
-                        });
-
-                // 星期X
-                final ArrayList<String> weekdata = new ArrayList<String>();
-                for (int i = 0; i < 7; i++) {
-                    weekdata.add(week[i]);
-                }
-                ArrayAdapter<String> week = new ArrayAdapter<String>(activity,
-                        android.R.layout.simple_spinner_item, weekdata);
-                week.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-                specicalWeek.setAdapter(week);
-                specicalWeek
-                        .setOnItemSelectedListener(new OnItemSelectedListener() {
-                            @Override
-                            public void onItemSelected(AdapterView<?> parent,
-                                                       View view, int position, long id) {
-                                sweek = position + 1;
-                            }
-
-                            @Override
-                            public void onNothingSelected(AdapterView<?> parent) {
-                            }
-                        });
-
-                builder2 = new AlertDialog.Builder(activity);
-                builder2.setView(specificDialogView)
-                        .setTitle("新增特殊节日")
-                        .setNegativeButton("取消", null)
-                        .setPositiveButton("确定",
-                                new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog,
-                                                        int which) {
-                                        if (db.insertSpecificFestival(nameView
-                                                        .getText().toString().trim(),
-                                                smonth, sorder, sweek)) {
-                                            initList();
-                                            showShortMessage("添加成功");
-                                        } else {
-                                            showShortMessage("添加特殊节日失败");
-                                        }
-                                    }
-                                }).show();
+        specificListener = v -> {
+            specificDialogView = getLayoutInflater().inflate(R.layout.dialog_add_specific, null);
+            nameView = (TextView) specificDialogView.findViewById(R.id.festival_name);
+            specicalMonth = (AppCompatSpinner) specificDialogView.findViewById(R.id.specific_month);
+            specicalOrder = (AppCompatSpinner) specificDialogView.findViewById(R.id.specific_order);
+            specicalWeek = (AppCompatSpinner) specificDialogView.findViewById(R.id.specific_week);
+            // 月
+            final ArrayList<Integer> mondata = new ArrayList<>();
+            for (int i = 1; i < 13; i++) {
+                mondata.add(i);
             }
+            ArrayAdapter<Integer> month = new ArrayAdapter<>(
+                    activity, android.R.layout.simple_spinner_item, mondata);
+            month.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+            specicalMonth.setAdapter(month);
+            specicalMonth.setOnItemSelectedListener(new OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    smonth = position;
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                }
+            });
+
+            // 第几个星期X
+            final ArrayList<Integer> orderdata = new ArrayList<>();
+            for (int i = 1; i < 6; i++) {
+                orderdata.add(i);
+            }
+            ArrayAdapter<Integer> order = new ArrayAdapter<>(activity, android.R.layout.simple_spinner_item, orderdata);
+            order.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+            specicalOrder.setAdapter(order);
+            specicalOrder.setOnItemSelectedListener(new OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    sorder = orderdata.get(position);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                }
+            });
+
+            // 星期X
+            final ArrayList<String> weekdata = new ArrayList<>();
+            for (int i = 0; i < 7; i++) {
+                weekdata.add(week[i]);
+            }
+            ArrayAdapter<String> week = new ArrayAdapter<>(activity, android.R.layout.simple_spinner_item, weekdata);
+            week.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+            specicalWeek.setAdapter(week);
+            specicalWeek.setOnItemSelectedListener(new OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent,
+                                           View view, int position, long id) {
+                    sweek = position + 1;
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                }
+            });
+
+            builder2 = new AlertDialog.Builder(activity);
+            builder2.setView(specificDialogView)
+                    .setTitle("新增特殊节日")
+                    .setNegativeButton("取消", null)
+                    .setPositiveButton("确定", (dialog, which) -> {
+                        if (db.insertSpecificFestival(nameView.getText().toString().trim(),
+                                smonth, sorder, sweek)) {
+                            initList();
+                            showShortMessage("添加成功");
+                        } else {
+                            showShortMessage("添加特殊节日失败");
+                        }
+                    }).show();
         };
     }
 
     private void initView() {
-        textView = (TextView) findViewById(R.id.text);
-        listView = (ListView) findViewById(R.id.dateview);
-        button = (Button) findViewById(R.id.addDate);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        listView = (RecyclerView) findViewById(R.id.dateview);
+        button = (FloatingActionButton) findViewById(R.id.addDate);
+        toolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
 
         datePickerDialog = new MyDatePickerDialog(this,
-                new OnDateSetListener() {
-
-                    @Override
-                    public void onDateSet(DatePicker view, int year,
-                                          int monthOfYear, int dayOfMonth) {
-                        month = monthOfYear;
-                        day = dayOfMonth;
-                        if (anniversary) {
-                            yearN = year;
-                            dateView.setText(yearN + "年" + (month + 1) + "月"
-                                    + dayOfMonth + "日");
-                        } else {
-                            yearN = 0;
-                            dateView.setText((month + 1) + "月" + day + "日");
-                        }
-                        Log.v("日期", yearN + "年" + monthOfYear + "月"
-                                + dayOfMonth + "日");
+                (view, year, monthOfYear, dayOfMonth) -> {
+                    month = monthOfYear;
+                    day = dayOfMonth;
+                    if (anniversary) {
+                        yearN = year;
+                        dateView.setText(yearN + "年" + (month + 1) + "月" + dayOfMonth + "日");
+                    } else {
+                        yearN = 0;
+                        dateView.setText((month + 1) + "月" + day + "日");
                     }
+                    Log.v("日期", yearN + "年" + monthOfYear + "月" + dayOfMonth + "日");
                 }, 2000, 0, 1);
     }
 
     private void initList() {
-        if (textView.getText().toString().equals("新历")) {
+        if (toolbarLayout.getTitle().equals("新历")) {
             loadXinLiData();
-        } else if (textView.getText().toString().equals("新历")) {
+        } else if (toolbarLayout.getTitle().equals("农历")) {
             loadNongLiData();
-        } else if (textView.getText().toString().equals("特殊")) {
+        } else if (toolbarLayout.getTitle().equals("特殊")) {
             loadSpecificData();
         }
     }
@@ -455,40 +392,35 @@ public class MainActivity extends Activity {
         type = TYPE_XINLI;
         reset();
 
-        textView.setText("新历");
-        button.setText("添加新历节日");
+        toolbarLayout.setTitle("新历");
 
         dates = db.getAllXinLiFestivalInfo();
-        listView.setAdapter(new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1, dates));
-        listView.setOnItemLongClickListener(new OnItemLongClickListener() {
-
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view,
-                                           int position, long id) {
-                String[] s = dates.get(position).split("\t\t");
-                if (s.length > 1) {
-                    selectFestivalName = s[1];
-                }
-                System.out.println(selectFestivalName);
-
-                return false;
+        DateRecyclerAdapter adapter = new DateRecyclerAdapter(this, dates, this);
+        adapter.setItemLongClickListener((v, position) -> {
+            String[] s = dates.get(position).split("\t\t");
+            if (s.length > 1) {
+                selectFestivalName = s[1];
             }
+            System.out.println(selectFestivalName);
+            return false;
         });
+        listView.setAdapter(adapter);
+        listView.setLayoutManager(new LinearLayoutManager(this));
         this.registerForContextMenu(listView);
 
         button.setOnClickListener(xinLiListener);
+
+        listView.scheduleLayoutAnimation();
     }
 
     private void loadNongLiData() {
         type = TYPE_NONGLI;
         reset();
 
-        textView.setText("农历");
-        button.setText("添加农历节日");
+        toolbarLayout.setTitle("农历");
 
         dates = db.getAllNongLiFestivalInfo();
-        ArrayList<String> nongLiDates = new ArrayList<String>();
+        ArrayList<String> nongLiDates = new ArrayList<>();
         for (String string : dates) {
             String m = string.substring(0, 2);
             String d = string.substring(2, 4);
@@ -502,35 +434,31 @@ public class MainActivity extends Activity {
 
             nongLiDates.add(buffer.toString());
         }
-        listView.setAdapter(new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1, nongLiDates));
-        listView.setOnItemLongClickListener(new OnItemLongClickListener() {
-
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view,
-                                           int position, long id) {
-                String[] s = dates.get(position).split("\t\t");
-                if (s.length > 1) {
-                    selectFestivalName = s[1];
-                }
-                System.out.println(selectFestivalName);
-
-                return false;
+        DateRecyclerAdapter adapter = new DateRecyclerAdapter(this, nongLiDates, this);
+        adapter.setItemLongClickListener((v, position) -> {
+            String[] s = dates.get(position).split("\t\t");
+            if (s.length > 1) {
+                selectFestivalName = s[1];
             }
+            System.out.println(selectFestivalName);
+            return false;
         });
+        listView.setAdapter(adapter);
+        listView.setLayoutManager(new LinearLayoutManager(this));
         this.registerForContextMenu(listView);
         button.setOnClickListener(nongLiListener);
+
+        listView.scheduleLayoutAnimation();
     }
 
     private void loadSpecificData() {
         type = TYPE_SPECIFIC;
         reset();
 
-        textView.setText("特殊");
-        button.setText("添加特殊节日");
+        toolbarLayout.setTitle("特殊");
 
         dates = db.getAllSpecificFestivalInfo();
-        ArrayList<String> specificDates = new ArrayList<String>();
+        ArrayList<String> specificDates = new ArrayList<>();
         for (String string : dates) {
             StringBuffer buffer = new StringBuffer();
 
@@ -544,24 +472,22 @@ public class MainActivity extends Activity {
 
             specificDates.add(buffer.toString());
         }
-        listView.setAdapter(new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1, specificDates));
-        listView.setOnItemLongClickListener(new OnItemLongClickListener() {
 
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view,
-                                           int position, long id) {
-                String[] s = dates.get(position).split("\t\t");
-                if (s.length > 3) {
-                    selectFestivalName = s[3];
-                }
-                System.out.println(selectFestivalName);
-
-                return false;
+        DateRecyclerAdapter adapter = new DateRecyclerAdapter(this, specificDates, this);
+        adapter.setItemLongClickListener((v, position) -> {
+            String[] s = dates.get(position).split("\t\t");
+            if (s.length > 3) {
+                selectFestivalName = s[3];
             }
+            System.out.println(selectFestivalName);
+            return false;
         });
+        listView.setAdapter(adapter);
+        listView.setLayoutManager(new LinearLayoutManager(this));
         this.registerForContextMenu(listView);
         button.setOnClickListener(specificListener);
+
+        listView.scheduleLayoutAnimation();
     }
 
     private void reset() {
@@ -578,13 +504,11 @@ public class MainActivity extends Activity {
     }
 
     public void showShortMessage(CharSequence text) {
-        Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT)
-                .show();
+        Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
@@ -599,7 +523,11 @@ public class MainActivity extends Activity {
             loadSpecificData();
         } else if (item.getTitle().toString().equals("更新日志")) {
             showUpdateLog();
+        } else if (item.getItemId() == R.id.weather_city) {
+            showCityInput();
         }
+//        else if (item.getItemId() == R.id.test) {
+//        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -616,42 +544,32 @@ public class MainActivity extends Activity {
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case 1:
-                Toast.makeText(getApplicationContext(), "懒得搞，删了再加吧",
-                        Toast.LENGTH_SHORT).show();
-
+                Toast.makeText(getApplicationContext(), "懒得搞，删了再加吧", Toast.LENGTH_SHORT).show();
                 break;
             case 2:
                 if (type == TYPE_XINLI) {
                     if (db.deleteXinLiFestival(selectFestivalName)) {
-                        Toast.makeText(getApplicationContext(), "删除成功",
-                                Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "删除成功", Toast.LENGTH_SHORT).show();
                         loadXinLiData();
                     } else {
-                        Toast.makeText(getApplicationContext(), "删除新历节日时出错！",
-                                Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "删除新历节日时出错！", Toast.LENGTH_SHORT).show();
                     }
                 } else if (type == TYPE_NONGLI) {
                     if (db.deleteNongLiFestival(selectFestivalName)) {
-                        Toast.makeText(getApplicationContext(), "删除成功",
-                                Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "删除成功", Toast.LENGTH_SHORT).show();
                         loadNongLiData();
                     } else {
-                        Toast.makeText(getApplicationContext(), "删除农历节日时出错！",
-                                Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "删除农历节日时出错！", Toast.LENGTH_SHORT).show();
                     }
                 } else if (type == TYPE_SPECIFIC) {
                     if (db.deleteSpecificFestival(selectFestivalName)) {
-                        Toast.makeText(getApplicationContext(), "删除成功",
-                                Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "删除成功", Toast.LENGTH_SHORT).show();
                         loadSpecificData();
                     } else {
-                        Toast.makeText(getApplicationContext(), "删除特殊 节日时出错！",
-                                Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "删除特殊 节日时出错！", Toast.LENGTH_SHORT).show();
                     }
                 }
-
                 break;
-
             default:
                 break;
         }
@@ -664,30 +582,16 @@ public class MainActivity extends Activity {
      * @author Administrator
      */
     class MyDatePickerDialog extends DatePickerDialog {
-
-        public MyDatePickerDialog(Context context, OnDateSetListener callBack,
-                                  int year, int monthOfYear, int dayOfMonth) {
+        public MyDatePickerDialog(Context context, OnDateSetListener callBack, int year, int monthOfYear, int dayOfMonth) {
             super(context, callBack, year, monthOfYear, dayOfMonth);
             // TODO Auto-generated constructor stub
         }
 
-        // public MyDatePickerDialog(Context context, OnDateSetListener
-        // callBack,
-        // int year, int monthOfYear, int dayOfMonth) {
-        // super(context, callBack, year, monthOfYear, dayOfMonth);
-        //
-        // this.setTitle((monthOfYear + 1) + "月" + dayOfMonth + "日");
-        //
-        // ((ViewGroup) ((ViewGroup) this.getDatePicker().getChildAt(0))
-        // .getChildAt(0)).getChildAt(0).setVisibility(View.GONE);
-        // }
-        //
         @Override
         public void onDateChanged(DatePicker view, int year, int month, int day) {
             super.onDateChanged(view, year, month, day);
             if (!anniversary) {
                 this.setTitle((month + 1) + "月" + day + "日");
-
             }
         }
     }
@@ -697,6 +601,60 @@ public class MainActivity extends Activity {
      */
     private void showUpdateLog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.update_title).setMessage(R.string.update_date).create().show();
+        builder.setTitle(getString(R.string.update_title) + " " + softVersion)
+                .setMessage(R.string.update_date).create().show();
+    }
+
+    /**
+     * 显示城市设置
+     */
+    private void showCityInput() {
+        Weather_sojson sojson = new Weather_sojson(this);
+
+        View view = getLayoutInflater().inflate(R.layout.dialog_set_city, null);
+        final EditText editText = (EditText) view.findViewById(R.id.city_name);
+        editText.setText(sojson.getCity());
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("城市设置").setView(view)
+                .setNegativeButton("取消", null)
+                .setPositiveButton("确定", (dialog, which) -> {
+                    String value = editText.getText().toString();
+                    if (TextUtils.isEmpty(value)) {
+                        editText.setError("cant null");
+                    } else {
+                        sojson.setCity(value);
+                        showShortMessage("操作成功");
+                    }
+                }).create().show();
+    }
+
+
+    /**
+     * 权限的申请，非常值得参照
+     *
+     * @return
+     */
+    private boolean mayRequestPermission() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return true;
+        }
+        if (checkSelfPermission(READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                && checkSelfPermission(WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+        requestPermissions(new String[]{READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE}, 0);
+        return false;
+    }
+
+    /**
+     * Callback received when a permissions request has been completed.
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == 0) {//不论结果所何，重启页面
+            startActivity(new Intent(this, MainActivity.class));
+            finish();
+        }
     }
 }
