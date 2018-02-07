@@ -25,7 +25,7 @@ public class TimerWidgetService extends Service {
          * do some thing
 		 */
         // 发送广播通知 widget 更新 状态
-        if (!TextUtils.isEmpty(intent.getAction())) {
+        if (intent != null && !TextUtils.isEmpty(intent.getAction())) {
             sendBroadcast(new Intent(intent.getAction()).putExtra("time", System.currentTimeMillis()));
             Toast.makeText(getApplicationContext(), intent.getAction(), Toast.LENGTH_LONG).show();
         }

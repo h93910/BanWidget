@@ -97,16 +97,20 @@ public class Weather_sojson {
         Log.d(TAG, text);
 
         Gson gson = new Gson();
-        JsonObject object = gson.fromJson(text, JsonObject.class);
-        if (object.getAsJsonObject("data") == null) return;
-        weatherInfos = object.getAsJsonObject("data").getAsJsonArray("forecast");
+        try {
+            JsonObject object = gson.fromJson(text, JsonObject.class);
+            if (object.getAsJsonObject("data") == null) return;
+            weatherInfos = object.getAsJsonObject("data").getAsJsonArray("forecast");
 
-        JsonObject saveDate = new JsonObject();
-        saveDate.addProperty("city", city);
-        saveDate.add("forecast", weatherInfos);
+            JsonObject saveDate = new JsonObject();
+            saveDate.addProperty("city", city);
+            saveDate.add("forecast", weatherInfos);
 
-        dataTool.setText(gson.toJson(saveDate));
-        context.sendBroadcast(new Intent("com.stone.action.start"));
+            dataTool.setText(gson.toJson(saveDate));
+            context.sendBroadcast(new Intent("com.stone.action.start"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 
