@@ -50,21 +50,29 @@ public class MyAppWidgetProvider extends AppWidgetProvider {
     public void onEnabled(Context context) {
         System.out.println("onEnabled");
 
-        Calendar c = Calendar.getInstance();
-        c.set(Calendar.HOUR_OF_DAY, 0);
-        c.set(Calendar.MINUTE, 0);
-        c.set(Calendar.SECOND, 0);
-        System.out.println(c.getTimeInMillis());
-
-        //每天更新发送的通知
-        Intent intent = new Intent("com.stone.action.start");
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
-
-        AlarmManager am = (AlarmManager) context.getSystemService(context.ALARM_SERVICE);
-        am.setRepeating(AlarmManager.RTC, c.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
-
+        sendAlarmBroadcast(context);
         super.onEnabled(context);
     }
+
+    private void sendAlarmBroadcast(Context context){
+//        Calendar c = Calendar.getInstance();
+//        System.out.println(c.getTimeInMillis());
+
+        //每天更新发送的通知
+        Intent intent = new Intent("on.enable.action");
+//        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);// 表示包含未启动的App
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0,                intent, 0);
+
+        AlarmManager am = (AlarmManager) context.getSystemService(context.ALARM_SERVICE);
+        int ALARM_TYPE = AlarmManager.RTC_WAKEUP;
+        long nextTime=System.currentTimeMillis()+60000;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            am.setExactAndAllowWhileIdle(ALARM_TYPE, nextTime, pendingIntent);
+        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+            am.setExact(ALARM_TYPE, nextTime, pendingIntent);
+        else
+            am.set(ALARM_TYPE, nextTime, pendingIntent);
+      }
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
@@ -94,12 +102,13 @@ public class MyAppWidgetProvider extends AppWidgetProvider {
         remoteViews.setOnClickPendingIntent(R.id.open, pendingIntent);
         remoteViews.setTextViewText(R.id.dongli_text, "农历:" + ChinaDate.today());
 
-        remoteViews.setViewVisibility(R.id.check, MySampleDate.getBooleanValue("check") ? View.GONE : View.VISIBLE);
-        Intent intent2 = new Intent(context, TimerWidgetService.class);
-        intent2.setAction("com.ban.click");
-        intent2.setData(Uri.parse("id:" + R.id.check));
-        PendingIntent pendingIntent2 = PendingIntent.getService(context, 0, intent2, PendingIntent.FLAG_UPDATE_CURRENT);
-        remoteViews.setOnClickPendingIntent(R.id.check, pendingIntent2);
+        //主页checkbox功能
+       // remoteViews.setViewVisibility(R.id.check, MySampleDate.getBooleanValue("check") ? View.GONE : View.VISIBLE);
+//        Intent intent2 = new Intent(context, TimerWidgetService.class);
+//        intent2.setAction("com.ban.click");
+//        intent2.setData(Uri.parse("id:" + R.id.check));
+//        PendingIntent pendingIntent2 = PendingIntent.getService(context, 0, intent2, PendingIntent.FLAG_UPDATE_CURRENT);
+//        remoteViews.setOnClickPendingIntent(R.id.check, pendingIntent2);
 
         String weatherInfo = weather.getWeatherAndTemperatureString();
         if (!TextUtils.isEmpty(weatherInfo)) {
@@ -125,22 +134,27 @@ public class MyAppWidgetProvider extends AppWidgetProvider {
 
         String action = intent.getAction();
         Log.i(TAG, action);
-        MySampleDate.getInstance(context, "set");
+      //  MySampleDate.getInstance(context, "set");
         if ("com.ban.click".equals(action)) {
-            MySampleDate.saveInfo("check", true);
+      //      MySampleDate.saveInfo("check", true);
             MySampleDate.saveInfo("checkTime", System.currentTimeMillis());
             Toast.makeText(context.getApplicationContext(), "checked", Toast.LENGTH_LONG).show();
-        } else if ("com.stone.action.start".equals(action)) {
-            Long last = MySampleDate.getLongValue("checkTime");
-            if (last != 0) {
-                Calendar calendarLast = Calendar.getInstance();
-                calendarLast.setTime(new Date(last));
-                Calendar calendarNow = Calendar.getInstance();
-                calendarNow.setTime(new Date());
-                if (calendarLast.get(Calendar.DAY_OF_MONTH) != calendarNow.get(Calendar.DAY_OF_MONTH)) {
-                    MySampleDate.deleteListInfo("check");
-                }
+        } else if ("on.enable.action".equals(action)) {
+            //因为setWindow只执行一次，所以要重新定义闹钟实现循环。
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                sendAlarmBroadcast(context);
             }
+        } else if ("com.stone.action.start".equals(action)) {
+//            Long last = MySampleDate.getLongValue("checkTime");
+//            if (last != 0) {
+//                Calendar calendarLast = Calendar.getInstance();
+//                calendarLast.setTime(new Date(last));
+//                Calendar calendarNow = Calendar.getInstance();
+//                calendarNow.setTime(new Date());
+//                if (calendarLast.get(Calendar.DAY_OF_MONTH) != calendarNow.get(Calendar.DAY_OF_MONTH)) {
+//             //       MySampleDate.deleteListInfo("check");
+//                }
+//            }
         } else if ("android.net.conn.CONNECTIVITY_CHANGE".equals(action)) {
             new Weather_sojson(context).getJsonFromNet();
             return;

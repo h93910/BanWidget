@@ -477,7 +477,7 @@ public class ChinaDate {
         while (true) {
             tempC += s_stAccInfo2[i];
             tempCalendar.setTime(new Date(tempC * 1000));
-            System.out.println(format.format(new Date(tempCalendar.getTimeInMillis())) + " " + solarTerm[i]);
+           // System.out.println(format.format(new Date(tempCalendar.getTimeInMillis())) + " " + solarTerm[i]);
             if (isSomeDay(calendar, tempCalendar)) {
                 return solarTerm[i];
             } else {

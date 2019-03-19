@@ -115,6 +115,8 @@ public class MainActivity extends AppCompatActivity {
      * 初始化数据
      */
     private void initDate() {
+        new Weather_sojson(this).getJsonFromNet();
+
         PackageManager pm = getApplicationContext().getPackageManager();
         PackageInfo pi;
         try {

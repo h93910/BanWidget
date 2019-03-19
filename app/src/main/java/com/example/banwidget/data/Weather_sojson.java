@@ -25,7 +25,7 @@ public class Weather_sojson {
 
     private Context context;
     private DataTool dataTool;
-    private String city = "深圳市";
+    private String city = "深圳";
     private JsonArray weatherInfos;
 
     public Weather_sojson(Context context) {
@@ -59,10 +59,12 @@ public class Weather_sojson {
         return null;
     }
 
+    /**
+     * 更新接口,原接口已经弃用
+     */
     public void getJsonFromNet() {
-        String url = "http://www.sojson.com/open/api/weather/json.shtml?city=" + getCity();
-        Log.d(TAG, url);
-        StringRequest request = new StringRequest(url, this::getInfoFromNet
+        String url = "http://cdn.sojson.com/_city.json";
+        StringRequest request = new StringRequest(url, this::getCityInfoFromNet
                 , error -> {
             //Error handling
         });
@@ -73,11 +75,13 @@ public class Weather_sojson {
     private String getInfoFromLocal() {
         Calendar calendar = Calendar.getInstance();
         StringBuffer dayKey = new StringBuffer();
-        dayKey.append(String.format("%02d日", calendar.get(Calendar.DAY_OF_MONTH)));
-        dayKey.append(context.getResources().getStringArray(R.array.week)[calendar.get(Calendar.DAY_OF_WEEK) - 1]);
+        dayKey.append(String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH)));
+        // dayKey.append(context.getResources().getStringArray(R.array.week)[calendar.get(Calendar.DAY_OF_WEEK) - 1]);
 
         String key = dayKey.toString();
-        for (JsonElement weatherInfo : weatherInfos) {
+        boolean refresh = true;
+        for (int i = 0; i < weatherInfos.size(); i++) {
+            JsonElement weatherInfo = weatherInfos.get(i);
             JsonObject object = weatherInfo.getAsJsonObject();
             if (object.get("date").getAsString().equals(key)) {
                 String low = object.get("low").getAsString().split(" ")[1];
@@ -88,9 +92,49 @@ public class Weather_sojson {
                 infoString.append(low + "至" + high);
                 return infoString.toString();
             }
+            if (i > 0 && refresh) {
+                refresh = false;
+                getJsonFromNet();
+            }
         }
         setCity(city);
         return "";
+    }
+
+    /**
+     * 取城市代码
+     *
+     * @param text
+     */
+    private void getCityInfoFromNet(String text) {
+        Log.d(TAG, text);
+
+        getCity();
+        Gson gson = new Gson();
+        try {
+            text = new String(text.getBytes("latin1"), "UTF-8");
+            JsonArray array = gson.fromJson(text, JsonArray.class);
+            String cityCode = "";
+            for (int i = 0; i < array.size(); i++) {
+                JsonObject jo = array.get(i).getAsJsonObject();
+                if (jo.get("city_name").getAsString().equals(city)) {
+                    cityCode = jo.get("city_code").getAsString();
+                }
+            }
+            if (cityCode.isEmpty()) return;
+
+            String url = "http://t.weather.sojson.com/api/weather/city/" + cityCode;
+            Log.d(TAG, url);
+            StringRequest request = new StringRequest(url, this::getInfoFromNet
+                    , error -> {
+                //Error handling
+            });
+
+            Crossbow.get(context).async(request);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void getInfoFromNet(String text) {

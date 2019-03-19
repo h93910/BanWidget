@@ -1,6 +1,10 @@
 package com.example.banwidget;
 
 import android.app.Application;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkRequest;
 
 import com.example.banwidget.tool.CrashHandler;
 

@@ -20,6 +20,12 @@ public class TimerWidgetService extends Service {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        System.out.println("onDestroy");
+    }
+
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         /*
          * do some thing

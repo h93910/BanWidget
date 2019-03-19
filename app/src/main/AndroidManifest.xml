@@ -30,6 +30,7 @@
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="com.stone.action.start" />
+                <action android:name="on.enable.action" />
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
                 <action android:name="com.ban.click" />
             </intent-filter>
