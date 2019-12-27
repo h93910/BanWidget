@@ -21,6 +21,7 @@ import com.example.banwidget.data.Weather_sojson;
 import com.example.banwidget.tool.BanDB;
 import com.example.banwidget.tool.MySampleDate;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -49,30 +50,29 @@ public class MyAppWidgetProvider extends AppWidgetProvider {
     @Override
     public void onEnabled(Context context) {
         System.out.println("onEnabled");
-
-        sendAlarmBroadcast(context);
+        // sendAlarmBroadcast(context);
         super.onEnabled(context);
     }
 
-    private void sendAlarmBroadcast(Context context){
+    private void sendAlarmBroadcast(Context context) {
 //        Calendar c = Calendar.getInstance();
 //        System.out.println(c.getTimeInMillis());
 
         //每天更新发送的通知
         Intent intent = new Intent("on.enable.action");
-//        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);// 表示包含未启动的App
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0,                intent, 0);
+        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);// 表示包含未启动的App
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
 
         AlarmManager am = (AlarmManager) context.getSystemService(context.ALARM_SERVICE);
         int ALARM_TYPE = AlarmManager.RTC_WAKEUP;
-        long nextTime=System.currentTimeMillis()+60000;
+        long nextTime = System.currentTimeMillis() + 60000;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
             am.setExactAndAllowWhileIdle(ALARM_TYPE, nextTime, pendingIntent);
         else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
             am.setExact(ALARM_TYPE, nextTime, pendingIntent);
         else
             am.set(ALARM_TYPE, nextTime, pendingIntent);
-      }
+    }
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
@@ -96,14 +96,22 @@ public class MyAppWidgetProvider extends AppWidgetProvider {
         temp = ChinaDate.today();
         RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget);
 
-        Intent intent = new Intent(context, MainActivity.class);
-        intent.setData(Uri.parse("id:" + R.id.open));
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        //打个主页面
+//        Intent intent = new Intent(context, MainActivity.class);
+//        intent.setData(Uri.parse("id:" + R.id.open));
+//        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        //每天更新发送的通知
+        Intent intent = new Intent("on.enable.action");
+        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);// 表示包含未启动的App
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
         remoteViews.setOnClickPendingIntent(R.id.open, pendingIntent);
         remoteViews.setTextViewText(R.id.dongli_text, "农历:" + ChinaDate.today());
 
+        String nowTimeString = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+        remoteViews.setTextViewText(R.id.click_time_text, "上次更新:"+nowTimeString);
+
         //主页checkbox功能
-       // remoteViews.setViewVisibility(R.id.check, MySampleDate.getBooleanValue("check") ? View.GONE : View.VISIBLE);
+        // remoteViews.setViewVisibility(R.id.check, MySampleDate.getBooleanValue("check") ? View.GONE : View.VISIBLE);
 //        Intent intent2 = new Intent(context, TimerWidgetService.class);
 //        intent2.setAction("com.ban.click");
 //        intent2.setData(Uri.parse("id:" + R.id.check));
@@ -114,7 +122,6 @@ public class MyAppWidgetProvider extends AppWidgetProvider {
         if (!TextUtils.isEmpty(weatherInfo)) {
             remoteViews.setTextViewText(R.id.weather_text, weatherInfo);
         }
-
 
         // ComponentName componentName = new ComponentName(context,
         // MyAppWidgetProvider.class);
@@ -134,16 +141,17 @@ public class MyAppWidgetProvider extends AppWidgetProvider {
 
         String action = intent.getAction();
         Log.i(TAG, action);
-      //  MySampleDate.getInstance(context, "set");
+        //  MySampleDate.getInstance(context, "set");
         if ("com.ban.click".equals(action)) {
-      //      MySampleDate.saveInfo("check", true);
+            //      MySampleDate.saveInfo("check", true);
             MySampleDate.saveInfo("checkTime", System.currentTimeMillis());
             Toast.makeText(context.getApplicationContext(), "checked", Toast.LENGTH_LONG).show();
         } else if ("on.enable.action".equals(action)) {
             //因为setWindow只执行一次，所以要重新定义闹钟实现循环。
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                sendAlarmBroadcast(context);
-            }
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                sendAlarmBroadcast(context);
+//            }
+            Toast.makeText(context.getApplicationContext(), "on.enable.action", Toast.LENGTH_LONG).show();
         } else if ("com.stone.action.start".equals(action)) {
 //            Long last = MySampleDate.getLongValue("checkTime");
 //            if (last != 0) {

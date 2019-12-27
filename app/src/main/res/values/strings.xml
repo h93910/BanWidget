@@ -6,7 +6,13 @@
     <string name="update_title">更新日志</string>
     <string name="permission_rationale">Dear Customer we need get your phone number,position, stock space,contacts for your safety using.</string>
     <string name="update_date">
-        2019.02.05
+        2019.08.03
+        \n增加插件上一次更新的时间
+        \n2019.06.13
+        \n!!!更换天气预报API
+        \n2019.06.12
+        \n去除桌面插件的自动刷新,改为手动刷新
+        \n2019.02.05
         \n将每天一刷新信息改为每十五分钟刷新一次
         \n修复天气不更新问题
         \n2019.01.19

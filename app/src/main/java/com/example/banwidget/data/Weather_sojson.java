@@ -2,6 +2,7 @@ package com.example.banwidget.data;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -14,7 +15,21 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Created by Ban on 2017/12/28.
@@ -63,14 +78,18 @@ public class Weather_sojson {
      * 更新接口,原接口已经弃用
      */
     public void getJsonFromNet() {
-        String url = "http://cdn.sojson.com/_city.json";
-        StringRequest request = new StringRequest(url, this::getCityInfoFromNet
-                , error -> {
-            //Error handling
-        });
+        String cityCode = getCityCode();
+        getCityInfoFromNet(cityCode);
 
-        Crossbow.get(context).async(request);
+//        String url = "http://cdn.sojson.com/_city.json";
+//        StringRequest request = new StringRequest(url, this::getCityInfoFromNet
+//                , error -> {
+//            //Error handling
+//        });
+//
+//        Crossbow.get(context).async(request);
     }
+
 
     private String getInfoFromLocal() {
         Calendar calendar = Calendar.getInstance();
@@ -106,35 +125,47 @@ public class Weather_sojson {
      *
      * @param text
      */
-    private void getCityInfoFromNet(String text) {
-        Log.d(TAG, text);
+    private void getCityInfoFromNet(String cityCode) {
+        Log.d(TAG, "城市代码:" + cityCode);
 
         getCity();
         Gson gson = new Gson();
-        try {
-            text = new String(text.getBytes("latin1"), "UTF-8");
-            JsonArray array = gson.fromJson(text, JsonArray.class);
-            String cityCode = "";
-            for (int i = 0; i < array.size(); i++) {
-                JsonObject jo = array.get(i).getAsJsonObject();
-                if (jo.get("city_name").getAsString().equals(city)) {
-                    cityCode = jo.get("city_code").getAsString();
-                }
-            }
-            if (cityCode.isEmpty()) return;
 
-            String url = "http://t.weather.sojson.com/api/weather/city/" + cityCode;
-            Log.d(TAG, url);
-            StringRequest request = new StringRequest(url, this::getInfoFromNet
-                    , error -> {
-                //Error handling
-            });
+        if (cityCode.isEmpty()) return;
+        String url = "http://t.weather.sojson.com/api/weather/city/" + cityCode;
+        Log.d(TAG, url);
+        StringRequest request = new StringRequest(url, this::getInfoFromNet
+                , error -> {
+            //Error handling
+        });
+        Crossbow.get(context).async(request);
 
-            Crossbow.get(context).async(request);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        getCity();
+//        Gson gson = new Gson();
+//        try {
+//            text = new String(text.getBytes("latin1"), "UTF-8");
+//            JsonArray array = gson.fromJson(text, JsonArray.class);
+//            String cityCode = "";
+//            for (int i = 0; i < array.size(); i++) {
+//                JsonObject jo = array.get(i).getAsJsonObject();
+//                if (jo.get("city_name").getAsString().equals(city)) {
+//                    cityCode = jo.get("city_code").getAsString();
+//                }
+//            }
+//            if (cityCode.isEmpty()) return;
+//
+//            String url = "http://t.weather.sojson.com/api/weather/city/" + cityCode;
+//            Log.d(TAG, url);
+//            StringRequest request = new StringRequest(url, this::getInfoFromNet
+//                    , error -> {
+//                //Error handling
+//            });
+//
+//            Crossbow.get(context).async(request);
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 
     private void getInfoFromNet(String text) {
@@ -167,5 +198,39 @@ public class Weather_sojson {
         dataTool.setText(gson.toJson(saveDate));
 
         context.sendBroadcast(new Intent("com.stone.action.start"));
+    }
+
+    private String getCityCode() {
+        AssetManager am = context.getResources().getAssets();
+        try {
+            InputStream is = am.open("CityCode.XLS");
+            Workbook mExcelWorkbook = new HSSFWorkbook(is);// 创建 Excel 2003 工作簿对象
+            Sheet s = mExcelWorkbook.getSheetAt(0);//选工作薄的第一个表
+            //取列名
+            ArrayList<String> cellName = new ArrayList<>();
+            Iterator<Cell> ci = s.getRow(0).cellIterator();
+            while (ci.hasNext()) {
+                cellName.add(ci.next().getStringCellValue());
+            }
+            //找城市id
+            for (int i = 0; i < s.getLastRowNum(); i++) {
+                Row r = s.getRow(i);
+                for (int j = 0; j < s.getRow(0).getLastCellNum(); j++) {
+                    CellType type = r.getCell(j).getCellTypeEnum();
+                    if (type == CellType.STRING) {
+                        if ("ChinsesName".equals(cellName.get(j))) {
+                            if (r.getCell(j).getStringCellValue().equals(city)) {
+                                is.close();
+                                return r.getCell(cellName.indexOf("CityCode")).getStringCellValue();
+                            }
+                        }
+                    }
+                }
+            }
+            is.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 }

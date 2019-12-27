@@ -31,19 +31,33 @@
 
         <Button
             android:id="@+id/check"
-            android:visibility="gone"
-            android:background="@drawable/ic_check_box_black_24dp"
             android:layout_width="25dp"
-            android:layout_height="25dp" />
+            android:layout_height="25dp"
+            android:background="@drawable/ic_check_box_black_24dp"
+            android:visibility="gone" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/jieri_text"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="right|bottom"
-        android:minLines="2"
-        android:text="111111111111111111111111111111111111111111111111111111111111111111111111111"
-        android:textColor="#ff0000"
-        android:textSize="25sp" />
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/jieri_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right|bottom"
+            android:minLines="2"
+            android:text="111111111111111111111111111111111111111111111111111111111111111111111111111"
+            android:textColor="#ff0000"
+            android:textSize="25sp" />
+
+        <TextView
+            android:id="@+id/click_time_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="ct"
+            android:textColor="#55ffffff"
+            android:textSize="11sp" />
+    </RelativeLayout>
 </LinearLayout>
