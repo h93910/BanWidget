@@ -2,11 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.banwidget">
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
     <application
         android:name=".MyApplication"
         android:allowBackup="true"
@@ -14,10 +9,14 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true">
+        <!-- usesCleartextTraffic　为允许http请求-->
+
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
+            android:launchMode="singleTop"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,13 +25,15 @@
             </intent-filter>
         </activity>
 
+        <meta-data
+            android:name="openweathermap_appid"
+            android:value="your key" />
+
         <receiver android:name=".MyAppWidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="com.stone.action.start" />
                 <action android:name="on.enable.action" />
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
                 <action android:name="com.ban.click" />
             </intent-filter>
 
@@ -41,12 +42,17 @@
                 android:resource="@xml/mywidget" />
         </receiver>
 
-        <service android:name=".TimerWidgetService">
-            <intent-filter>
-                <action android:name="com.stone.action.start" />
-                <action android:name="com.ban.click" />
-            </intent-filter>
-        </service>
+        <service android:name=".TimerWidgetService" />
+
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
     </application>
 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
 </manifest>

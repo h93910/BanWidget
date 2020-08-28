@@ -31,7 +31,7 @@
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
-        <android.support.v7.widget.AppCompatSpinner
+        <androidx.appcompat.widget.AppCompatSpinner
             android:id="@+id/specific_month"
             style="@style/MySpinner"
             android:layout_width="wrap_content"
@@ -47,7 +47,7 @@
             android:layout_height="wrap_content"
             android:text="第" />
 
-        <android.support.v7.widget.AppCompatSpinner
+        <androidx.appcompat.widget.AppCompatSpinner
             android:id="@+id/specific_order"
             style="@style/MySpinner"
             android:layout_width="wrap_content"
@@ -58,7 +58,7 @@
             android:layout_height="wrap_content"
             android:text="个星期" />
 
-        <android.support.v7.widget.AppCompatSpinner
+        <androidx.appcompat.widget.AppCompatSpinner
             android:id="@+id/specific_week"
             style="@style/MySpinner"
             android:layout_width="wrap_content"

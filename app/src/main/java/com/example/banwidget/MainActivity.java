@@ -9,14 +9,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.AppCompatSpinner;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -34,9 +26,18 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatSpinner;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.banwidget.data.ChinaDate;
 import com.example.banwidget.data.Weather_sojson;
 import com.example.banwidget.tool.BanDB;
+import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 
@@ -151,15 +152,15 @@ public class MainActivity extends AppCompatActivity {
             xinLiDialogView.findViewById(R.id.pickDate).setOnClickListener(v12 -> datePickerDialog.show());
             builder = new AlertDialog.Builder(activity);
             builder.setView(xinLiDialogView)
-                    .setTitle("新增新历节日")
-                    .setNegativeButton("取消", null)
-                    .setPositiveButton("确定",
+                    .setTitle(R.string.main_add_solar_festival)
+                    .setNegativeButton(R.string.cancel, null)
+                    .setPositiveButton(R.string.confirm,
                             (dialog, which) -> {
                                 if (db.insertXinLiFestival(nameView.getText().toString().trim(), month, day, yearN)) {
                                     initList();
-                                    Toast.makeText(getApplicationContext(), "添加成功", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getApplicationContext(), R.string.main_add_success, Toast.LENGTH_SHORT).show();
                                 } else {
-                                    Toast.makeText(getApplicationContext(), "添加新历节日失败", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getApplicationContext(), R.string.main_add_solar_festival_fail, Toast.LENGTH_SHORT).show();
                                 }
                             }).show();
         };
@@ -235,9 +236,9 @@ public class MainActivity extends AppCompatActivity {
 
                 builder2 = new AlertDialog.Builder(activity);
                 builder2.setView(nongLiDialogView)
-                        .setTitle("新增农历节日")
-                        .setNegativeButton("取消", null)
-                        .setPositiveButton("确定", (dialog, which) -> {
+                        .setTitle(R.string.main_add_lunar_festival)
+                        .setNegativeButton(R.string.cancel, null)
+                        .setPositiveButton(R.string.confirm, (dialog, which) -> {
                             if (nongliYear.getVisibility() == View.VISIBLE) {
                                 if (nongliYear.getText().toString().trim().equals("")) {
                                     yearN = 0;
@@ -250,9 +251,9 @@ public class MainActivity extends AppCompatActivity {
                             }
                             if (db.insertNongLiFestival(nameView.getText().toString().trim(), month, day, yearN)) {
                                 initList();
-                                showShortMessage("添加成功");
+                                showShortMessage(getString(R.string.main_add_success));
                             } else {
-                                showShortMessage("添加农历节日失败");
+                                showShortMessage(getString(R.string.main_add_lunar_festival_fail));
                             }
                         }).show();
             }
@@ -343,27 +344,27 @@ public class MainActivity extends AppCompatActivity {
 
             builder2 = new AlertDialog.Builder(activity);
             builder2.setView(specificDialogView)
-                    .setTitle("新增特殊节日")
-                    .setNegativeButton("取消", null)
-                    .setPositiveButton("确定", (dialog, which) -> {
+                    .setTitle(R.string.main_add_special_festival)
+                    .setNegativeButton(R.string.cancel, null)
+                    .setPositiveButton(R.string.confirm, (dialog, which) -> {
                         if (db.insertSpecificFestival(nameView.getText().toString().trim(),
                                 smonth, sorder, sweek)) {
                             initList();
-                            showShortMessage("添加成功");
+                            showShortMessage(getString(R.string.main_add_success));
                         } else {
-                            showShortMessage("添加特殊节日失败");
+                            showShortMessage(getString(R.string.main_add_special_festival_fail));
                         }
                     }).show();
         };
     }
 
     private void initView() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        listView = (RecyclerView) findViewById(R.id.dateview);
-        button = (FloatingActionButton) findViewById(R.id.addDate);
-        toolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
+        listView = findViewById(R.id.dateview);
+        button = findViewById(R.id.addDate);
+        toolbarLayout = findViewById(R.id.toolbar_layout);
 
         datePickerDialog = new MyDatePickerDialog(this,
                 (view, year, monthOfYear, dayOfMonth) -> {
@@ -381,11 +382,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initList() {
-        if (toolbarLayout.getTitle().equals("新历")) {
+        if (toolbarLayout.getTitle().equals(getString(R.string.main_solar))) {
             loadXinLiData();
-        } else if (toolbarLayout.getTitle().equals("农历")) {
+        } else if (toolbarLayout.getTitle().equals(getString(R.string.main_lunar))) {
             loadNongLiData();
-        } else if (toolbarLayout.getTitle().equals("特殊")) {
+        } else if (toolbarLayout.getTitle().equals(getString(R.string.main_special))) {
             loadSpecificData();
         }
     }
@@ -394,7 +395,7 @@ public class MainActivity extends AppCompatActivity {
         type = TYPE_XINLI;
         reset();
 
-        toolbarLayout.setTitle("新历");
+        toolbarLayout.setTitle(getString(R.string.main_solar));
 
         dates = db.getAllXinLiFestivalInfo();
         DateRecyclerAdapter adapter = new DateRecyclerAdapter(this, dates, this);
@@ -419,7 +420,7 @@ public class MainActivity extends AppCompatActivity {
         type = TYPE_NONGLI;
         reset();
 
-        toolbarLayout.setTitle("农历");
+        toolbarLayout.setTitle(getString(R.string.main_lunar));
 
         dates = db.getAllNongLiFestivalInfo();
         ArrayList<String> nongLiDates = new ArrayList<>();
@@ -457,7 +458,7 @@ public class MainActivity extends AppCompatActivity {
         type = TYPE_SPECIFIC;
         reset();
 
-        toolbarLayout.setTitle("特殊");
+        toolbarLayout.setTitle(getString(R.string.main_special));
 
         dates = db.getAllSpecificFestivalInfo();
         ArrayList<String> specificDates = new ArrayList<>();
@@ -517,13 +518,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getTitle().toString().equals("新历")) {
+        if (item.getTitle().toString().equals(getString(R.string.main_solar))) {
             loadXinLiData();
-        } else if (item.getTitle().toString().equals("农历")) {
+        } else if (item.getTitle().toString().equals(getString(R.string.main_lunar))) {
             loadNongLiData();
-        } else if (item.getTitle().toString().equals("特殊")) {
+        } else if (item.getTitle().toString().equals(getString(R.string.main_special))) {
             loadSpecificData();
-        } else if (item.getTitle().toString().equals("更新日志")) {
+        } else if (item.getTitle().toString().equals(getString(R.string.update_title))) {
             showUpdateLog();
         } else if (item.getItemId() == R.id.weather_city) {
             showCityInput();
@@ -537,38 +538,38 @@ public class MainActivity extends AppCompatActivity {
     public void onCreateContextMenu(ContextMenu menu, View v,
                                     ContextMenuInfo menuInfo) {
         menu.clear();
-        menu.setHeaderTitle("操作");
-        menu.add(0, 1, Menu.NONE, "修改节日名");
-        menu.add(0, 2, Menu.NONE, "删除此节日");
+        menu.setHeaderTitle(R.string.main_operation);
+        menu.add(0, 1, Menu.NONE, R.string.main_festival_name);
+        menu.add(0, 2, Menu.NONE, R.string.main_festival_delete);
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case 1:
-                Toast.makeText(getApplicationContext(), "懒得搞，删了再加吧", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), R.string.main_lazy, Toast.LENGTH_SHORT).show();
                 break;
             case 2:
                 if (type == TYPE_XINLI) {
                     if (db.deleteXinLiFestival(selectFestivalName)) {
-                        Toast.makeText(getApplicationContext(), "删除成功", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), R.string.main_delete_success, Toast.LENGTH_SHORT).show();
                         loadXinLiData();
                     } else {
-                        Toast.makeText(getApplicationContext(), "删除新历节日时出错！", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), R.string.main_delete_solar_fail, Toast.LENGTH_SHORT).show();
                     }
                 } else if (type == TYPE_NONGLI) {
                     if (db.deleteNongLiFestival(selectFestivalName)) {
-                        Toast.makeText(getApplicationContext(), "删除成功", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(),  R.string.main_delete_success, Toast.LENGTH_SHORT).show();
                         loadNongLiData();
                     } else {
-                        Toast.makeText(getApplicationContext(), "删除农历节日时出错！", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), R.string.main_delete_lunar_fail, Toast.LENGTH_SHORT).show();
                     }
                 } else if (type == TYPE_SPECIFIC) {
                     if (db.deleteSpecificFestival(selectFestivalName)) {
-                        Toast.makeText(getApplicationContext(), "删除成功", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(),  R.string.main_delete_success, Toast.LENGTH_SHORT).show();
                         loadSpecificData();
                     } else {
-                        Toast.makeText(getApplicationContext(), "删除特殊 节日时出错！", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), R.string.main_delete_special_fail, Toast.LENGTH_SHORT).show();
                     }
                 }
                 break;
@@ -618,15 +619,15 @@ public class MainActivity extends AppCompatActivity {
         editText.setText(sojson.getCity());
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("城市设置").setView(view)
-                .setNegativeButton("取消", null)
-                .setPositiveButton("确定", (dialog, which) -> {
+        builder.setTitle(R.string.city_setting).setView(view)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.confirm, (dialog, which) -> {
                     String value = editText.getText().toString();
                     if (TextUtils.isEmpty(value)) {
                         editText.setError("cant null");
                     } else {
                         sojson.setCity(value);
-                        showShortMessage("操作成功");
+                        showShortMessage(getString(R.string.operation_complete));
                     }
                 }).create().show();
     }
@@ -638,9 +639,6 @@ public class MainActivity extends AppCompatActivity {
      * @return
      */
     private boolean mayRequestPermission() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return true;
-        }
         if (checkSelfPermission(READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
                 && checkSelfPermission(WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             return true;
@@ -654,6 +652,7 @@ public class MainActivity extends AppCompatActivity {
      */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 0) {//不论结果所何，重启页面
             startActivity(new Intent(this, MainActivity.class));
             finish();

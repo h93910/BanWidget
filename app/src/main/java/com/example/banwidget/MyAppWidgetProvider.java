@@ -7,14 +7,15 @@ import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
+import android.graphics.Bitmap;
 import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.Toast;
+
+import androidx.annotation.RequiresApi;
 
 import com.example.banwidget.data.ChinaDate;
 import com.example.banwidget.data.Weather_sojson;
@@ -23,9 +24,10 @@ import com.example.banwidget.tool.MySampleDate;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.TimerTask;
+
+import static android.content.Intent.ACTION_POWER_CONNECTED;
+import static android.content.Intent.ACTION_SCREEN_ON;
 
 /**
  * 变量使用需要注意，有分分钟被清掉数据的时候
@@ -103,12 +105,13 @@ public class MyAppWidgetProvider extends AppWidgetProvider {
         //每天更新发送的通知
         Intent intent = new Intent("on.enable.action");
         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);// 表示包含未启动的App
+        intent.setComponent(new ComponentName(context, MyAppWidgetProvider.class));//api 8.0以上发给自己的必须写
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
         remoteViews.setOnClickPendingIntent(R.id.open, pendingIntent);
         remoteViews.setTextViewText(R.id.dongli_text, "农历:" + ChinaDate.today());
 
         String nowTimeString = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-        remoteViews.setTextViewText(R.id.click_time_text, "上次更新:"+nowTimeString);
+        remoteViews.setTextViewText(R.id.click_time_text, "上次更新:" + nowTimeString);
 
         //主页checkbox功能
         // remoteViews.setViewVisibility(R.id.check, MySampleDate.getBooleanValue("check") ? View.GONE : View.VISIBLE);
@@ -122,17 +125,18 @@ public class MyAppWidgetProvider extends AppWidgetProvider {
         if (!TextUtils.isEmpty(weatherInfo)) {
             remoteViews.setTextViewText(R.id.weather_text, weatherInfo);
         }
+        Bitmap weatherIcon = weather.getWeatherIcon();
+        remoteViews.setImageViewBitmap(R.id.weather_icon, weatherIcon);
+        remoteViews.setViewVisibility(R.id.weather_icon_bg, weatherIcon == null ? View.GONE : View.VISIBLE);
 
-        // ComponentName componentName = new ComponentName(context,
-        // MyAppWidgetProvider.class);
         remoteViews.setTextViewText(R.id.jieri_text, "无节日");// 没节日先设为空
         appWidgetManager.updateAppWidget(appWidgetIds, remoteViews);
 
         checkFestival(appWidgetManager, remoteViews, appWidgetIds);
-        // Timer timer = new Timer();
-        // timer.schedule(new MyTime(appWidgetManager, remoteViews,
-        // appWidgetIds),
-        // 1000, 1000);
+        if (banDB != null) {
+            banDB.onDestory();
+            banDB = null;
+        }
     }
 
     @Override
@@ -153,7 +157,8 @@ public class MyAppWidgetProvider extends AppWidgetProvider {
 //            }
             Toast.makeText(context.getApplicationContext(), "on.enable.action", Toast.LENGTH_LONG).show();
         } else if ("com.stone.action.start".equals(action)) {
-//            Long last = MySampleDate.getLongValue("checkTime");
+            Toast.makeText(context.getApplicationContext(), "on.enable.action.start", Toast.LENGTH_LONG).show();
+            //            Long last = MySampleDate.getLongValue("checkTime");
 //            if (last != 0) {
 //                Calendar calendarLast = Calendar.getInstance();
 //                calendarLast.setTime(new Date(last));
@@ -163,7 +168,7 @@ public class MyAppWidgetProvider extends AppWidgetProvider {
 //             //       MySampleDate.deleteListInfo("check");
 //                }
 //            }
-        } else if ("android.net.conn.CONNECTIVITY_CHANGE".equals(action)) {
+        } else if ("ban.net.conn.CONNECTIVITY_CHANGE".equals(action)) {
             new Weather_sojson(context).getJsonFromNet();
             return;
         }

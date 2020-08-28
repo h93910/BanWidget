@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/open"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -13,6 +14,13 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
+        <Button
+            android:id="@+id/check"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:background="@drawable/ic_check_box_black_24dp"
+            android:visibility="gone" />
+
         <TextView
             android:id="@+id/dongli_text"
             android:layout_width="0dp"
@@ -22,24 +30,49 @@
             android:textColor="#ffffff"
             android:textSize="18sp" />
 
-        <TextView
-            android:id="@+id/weather_text"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="天气无数据"
-            android:textColor="#ffffff" />
+            android:orientation="horizontal"
+            android:gravity="center">
+            <TextView
+                android:id="@+id/weather_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:text="@string/weather_none"
+                android:textColor="#ffffff" />
 
-        <Button
-            android:id="@+id/check"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:background="@drawable/ic_check_box_black_24dp"
-            android:visibility="gone" />
+            <LinearLayout
+                android:id="@+id/weather_icon_bg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:background="@drawable/icon_bg">
+
+                <ImageView
+                    android:id="@+id/weather_icon"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_margin="2dp"
+                    android:src="@drawable/ic_add_black_24dp" />
+        </LinearLayout>
+
+        </LinearLayout>
     </LinearLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/click_time_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="ct"
+            android:textColor="#55ffffff"
+            android:textSize="11sp" />
 
         <TextView
             android:id="@+id/jieri_text"
@@ -50,14 +83,5 @@
             android:text="111111111111111111111111111111111111111111111111111111111111111111111111111"
             android:textColor="#ff0000"
             android:textSize="25sp" />
-
-        <TextView
-            android:id="@+id/click_time_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:text="ct"
-            android:textColor="#55ffffff"
-            android:textSize="11sp" />
     </RelativeLayout>
 </LinearLayout>
