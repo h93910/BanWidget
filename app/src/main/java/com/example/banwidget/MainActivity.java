@@ -40,6 +40,7 @@ import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
@@ -366,6 +367,7 @@ public class MainActivity extends AppCompatActivity {
         button = findViewById(R.id.addDate);
         toolbarLayout = findViewById(R.id.toolbar_layout);
 
+        Calendar today=Calendar.getInstance();
         datePickerDialog = new MyDatePickerDialog(this,
                 (view, year, monthOfYear, dayOfMonth) -> {
                     month = monthOfYear;
@@ -378,7 +380,7 @@ public class MainActivity extends AppCompatActivity {
                         dateView.setText((month + 1) + "月" + day + "日");
                     }
                     Log.v("日期", yearN + "年" + monthOfYear + "月" + dayOfMonth + "日");
-                }, 2000, 0, 1);
+                }, today.get(Calendar.YEAR),today.get(Calendar.MONTH) , today.get(Calendar.DAY_OF_MONTH));
     }
 
     private void initList() {
