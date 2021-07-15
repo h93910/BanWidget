@@ -8,7 +8,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -20,14 +23,16 @@ import androidx.annotation.RequiresApi;
 import com.example.banwidget.data.ChinaDate;
 import com.example.banwidget.data.Weather_sojson;
 import com.example.banwidget.tool.BanDB;
+import com.example.banwidget.data.FY4A;
 import com.example.banwidget.tool.MySampleDate;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-import static android.content.Intent.ACTION_POWER_CONNECTED;
-import static android.content.Intent.ACTION_SCREEN_ON;
+import static android.content.Context.CONNECTIVITY_SERVICE;
 
 /**
  * 变量使用需要注意，有分分钟被清掉数据的时候
@@ -35,17 +40,10 @@ import static android.content.Intent.ACTION_SCREEN_ON;
 @RequiresApi(api = Build.VERSION_CODES.CUPCAKE)
 public class MyAppWidgetProvider extends AppWidgetProvider {
     private static final String TAG = "MyAppWidgetProvider";
-    private String temp = "";
-    private BanDB banDB;
-    private Weather_sojson weather;
-    private MySampleDate mySampleDate;
+    private volatile boolean fy = false;
 
     @Override
     public void onDeleted(Context context, int[] appWidgetIds) {
-        if (banDB != null) {
-            banDB.onDestory();
-            banDB = null;
-        }
         super.onDeleted(context, appWidgetIds);
     }
 
@@ -81,21 +79,11 @@ public class MyAppWidgetProvider extends AppWidgetProvider {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
 
         System.out.println("onUpdate");
-        if (banDB == null) {
-            try {
-                banDB = new BanDB(context);
-            } catch (Exception e) {
-                Intent intent = new Intent(context, MainActivity.class);
-                context.startActivity(intent);
-                return;
-            }
-        }
-        if (weather == null) {
-            weather = new Weather_sojson(context);
-        }
+        BanDB banDB = new BanDB(context);
+
+        Weather_sojson weather = new Weather_sojson(context);
         MySampleDate.getInstance(context, "set");
 
-        temp = ChinaDate.today();
         RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget);
 
         //打个主页面
@@ -132,11 +120,9 @@ public class MyAppWidgetProvider extends AppWidgetProvider {
         remoteViews.setTextViewText(R.id.jieri_text, "无节日");// 没节日先设为空
         appWidgetManager.updateAppWidget(appWidgetIds, remoteViews);
 
-        checkFestival(appWidgetManager, remoteViews, appWidgetIds);
-        if (banDB != null) {
-            banDB.onDestory();
-            banDB = null;
-        }
+        checkFestival(banDB, appWidgetManager, remoteViews, appWidgetIds);
+
+        banDB.onDestory();
     }
 
     @Override
@@ -177,9 +163,23 @@ public class MyAppWidgetProvider extends AppWidgetProvider {
         ComponentName componentName = new ComponentName(context, MyAppWidgetProvider.class);
         int[] appWidgetIds = appWidgetManager.getAppWidgetIds(componentName);
         onUpdate(context, appWidgetManager, appWidgetIds);
+
+        if (checkNetAvailable(context)) {
+            if (!fy) {
+                fy = true;
+                MyApplication.ThreadExecutor.execute(() -> {
+                    SystemClock.sleep(10 * 1000);
+                    FY4A fy = new FY4A(context);
+                    fy.execute();
+                    fy.onDestroy();
+                    SystemClock.sleep(2 * 60 * 1000);
+                    this.fy = false;
+                });
+            }
+        }
     }
 
-    private void checkFestival(AppWidgetManager appWidgetManager,
+    private void checkFestival(BanDB banDB, AppWidgetManager appWidgetManager,
                                RemoteViews remoteViews, int[] appWidgetIds) {
         StringBuffer buffer = new StringBuffer();
         //农历节
@@ -214,5 +214,12 @@ public class MyAppWidgetProvider extends AppWidgetProvider {
             remoteViews.setTextViewText(R.id.jieri_text, "今天是:" + showString);
             appWidgetManager.updateAppWidget(appWidgetIds, remoteViews);
         }
+    }
+
+    private boolean checkNetAvailable(Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.
+                getSystemService(CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isAvailable();
     }
 }

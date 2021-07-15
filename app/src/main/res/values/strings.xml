@@ -4,7 +4,14 @@
     <string name="action_settings">Settings</string>
     <string name="update_title">更新日志</string>
     <string name="update_date">
-        2020.10.13
+        2021.07.07
+        \n改换jcenter()为mavenCentral()
+        \n改换crossbow为okhttp
+        \n2021.07.06
+        \n内存优化
+        \n2021.07.05
+        \n!!!新增风云四号卫星云图设置为桌面背景
+        \n2020.10.13
         \n将新增新历节日时的固定日期改为当前日期
         \n2020.10.02
         \n修复没网时回滚的问题
