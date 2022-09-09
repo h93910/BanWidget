@@ -7,9 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -22,7 +20,6 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,7 +31,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.banwidget.data.ChinaDate;
-import com.example.banwidget.data.Weather_sojson;
+import com.example.banwidget.data.Weather;
 import com.example.banwidget.tool.BanDB;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -117,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
      * 初始化数据
      */
     private void initDate() {
-        new Weather_sojson(this).getJsonFromNet();
+        new Weather(this).getJsonFromNet();
 
         PackageManager pm = getApplicationContext().getPackageManager();
         PackageInfo pi;
@@ -367,7 +364,7 @@ public class MainActivity extends AppCompatActivity {
         button = findViewById(R.id.addDate);
         toolbarLayout = findViewById(R.id.toolbar_layout);
 
-        Calendar today=Calendar.getInstance();
+        Calendar today = Calendar.getInstance();
         datePickerDialog = new MyDatePickerDialog(this,
                 (view, year, monthOfYear, dayOfMonth) -> {
                     month = monthOfYear;
@@ -380,7 +377,7 @@ public class MainActivity extends AppCompatActivity {
                         dateView.setText((month + 1) + "月" + day + "日");
                     }
                     Log.v("日期", yearN + "年" + monthOfYear + "月" + dayOfMonth + "日");
-                }, today.get(Calendar.YEAR),today.get(Calendar.MONTH) , today.get(Calendar.DAY_OF_MONTH));
+                }, today.get(Calendar.YEAR), today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH));
     }
 
     private void initList() {
@@ -529,10 +526,8 @@ public class MainActivity extends AppCompatActivity {
         } else if (item.getTitle().toString().equals(getString(R.string.update_title))) {
             showUpdateLog();
         } else if (item.getItemId() == R.id.weather_city) {
-            showCityInput();
+            startActivity(new Intent(this, SettingActivity.class));
         }
-//        else if (item.getItemId() == R.id.test) {
-//        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -561,14 +556,14 @@ public class MainActivity extends AppCompatActivity {
                     }
                 } else if (type == TYPE_NONGLI) {
                     if (db.deleteNongLiFestival(selectFestivalName)) {
-                        Toast.makeText(getApplicationContext(),  R.string.main_delete_success, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), R.string.main_delete_success, Toast.LENGTH_SHORT).show();
                         loadNongLiData();
                     } else {
                         Toast.makeText(getApplicationContext(), R.string.main_delete_lunar_fail, Toast.LENGTH_SHORT).show();
                     }
                 } else if (type == TYPE_SPECIFIC) {
                     if (db.deleteSpecificFestival(selectFestivalName)) {
-                        Toast.makeText(getApplicationContext(),  R.string.main_delete_success, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), R.string.main_delete_success, Toast.LENGTH_SHORT).show();
                         loadSpecificData();
                     } else {
                         Toast.makeText(getApplicationContext(), R.string.main_delete_special_fail, Toast.LENGTH_SHORT).show();
@@ -609,31 +604,6 @@ public class MainActivity extends AppCompatActivity {
         builder.setTitle(getString(R.string.update_title) + " " + softVersion)
                 .setMessage(R.string.update_date).create().show();
     }
-
-    /**
-     * 显示城市设置
-     */
-    private void showCityInput() {
-        Weather_sojson sojson = new Weather_sojson(this);
-
-        View view = getLayoutInflater().inflate(R.layout.dialog_set_city, null);
-        final EditText editText = (EditText) view.findViewById(R.id.city_name);
-        editText.setText(sojson.getCity());
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.city_setting).setView(view)
-                .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.confirm, (dialog, which) -> {
-                    String value = editText.getText().toString();
-                    if (TextUtils.isEmpty(value)) {
-                        editText.setError("cant null");
-                    } else {
-                        sojson.setCity(value);
-                        showShortMessage(getString(R.string.operation_complete));
-                    }
-                }).create().show();
-    }
-
 
     /**
      * 权限的申请，非常值得参照

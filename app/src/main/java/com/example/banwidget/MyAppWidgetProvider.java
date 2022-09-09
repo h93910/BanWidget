@@ -21,7 +21,7 @@ import android.widget.Toast;
 import androidx.annotation.RequiresApi;
 
 import com.example.banwidget.data.ChinaDate;
-import com.example.banwidget.data.Weather_sojson;
+import com.example.banwidget.data.Weather;
 import com.example.banwidget.tool.BanDB;
 import com.example.banwidget.data.FY4A;
 import com.example.banwidget.tool.MySampleDate;
@@ -29,8 +29,6 @@ import com.example.banwidget.tool.MySampleDate;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import static android.content.Context.CONNECTIVITY_SERVICE;
 
@@ -40,7 +38,6 @@ import static android.content.Context.CONNECTIVITY_SERVICE;
 @RequiresApi(api = Build.VERSION_CODES.CUPCAKE)
 public class MyAppWidgetProvider extends AppWidgetProvider {
     private static final String TAG = "MyAppWidgetProvider";
-    private volatile boolean fy = false;
 
     @Override
     public void onDeleted(Context context, int[] appWidgetIds) {
@@ -81,7 +78,7 @@ public class MyAppWidgetProvider extends AppWidgetProvider {
         System.out.println("onUpdate");
         BanDB banDB = new BanDB(context);
 
-        Weather_sojson weather = new Weather_sojson(context);
+        Weather weather = new Weather(context);
         MySampleDate.getInstance(context, "set");
 
         RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget);
@@ -155,7 +152,7 @@ public class MyAppWidgetProvider extends AppWidgetProvider {
 //                }
 //            }
         } else if ("ban.net.conn.CONNECTIVITY_CHANGE".equals(action)) {
-            new Weather_sojson(context).getJsonFromNet();
+            new Weather(context).getJsonFromNet();
             return;
         }
 
@@ -165,17 +162,8 @@ public class MyAppWidgetProvider extends AppWidgetProvider {
         onUpdate(context, appWidgetManager, appWidgetIds);
 
         if (checkNetAvailable(context)) {
-            if (!fy) {
-                fy = true;
-                MyApplication.ThreadExecutor.execute(() -> {
-                    SystemClock.sleep(10 * 1000);
-                    FY4A fy = new FY4A(context);
-                    fy.execute();
-                    fy.onDestroy();
-                    SystemClock.sleep(2 * 60 * 1000);
-                    this.fy = false;
-                });
-            }
+            FY4A fy = new FY4A(context);
+            fy.execute();
         }
     }
 

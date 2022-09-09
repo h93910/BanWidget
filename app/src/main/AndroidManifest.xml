@@ -26,6 +26,8 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".SettingActivity" />
+
         <meta-data
             android:name="openweathermap_appid"
             android:value="your key" />

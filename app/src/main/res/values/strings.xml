@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">BanWidget</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_settings">设置</string>
     <string name="update_title">更新日志</string>
     <string name="update_date">
-        2021.07.07
+        2022.09.01
+        \n新增设置页，把城市设置移入其中，增加是否自己下载云图的设置
+        \n2022.06.27
+        \n优化云图信息获取
+        \n2022.06.24
+        \n国家气象卫星中心不再提供单图拼接，他们改为整张
+        \n现改换直接下载自己的服务器统一处理后图片
+        \n2021.07.07
         \n改换jcenter()为mavenCentral()
         \n改换crossbow为okhttp
         \n2021.07.06
@@ -76,8 +83,9 @@
     </string>
     <string name="city_setting">城市设置(要求使用拼音且每个字首字母大写)</string>
     <string name="city_setting_fail">未找到城市:%1$s,将回滚为:%2$s</string>
-    <string name="city_setting_fail_net">获取数据失败</string>
-    <string name="city_setting_fail_code">获取数据数据有误</string>
+    <string name="city_setting_fail_net">获取天气数据失败</string>
+    <string name="city_setting_fail_code">获取数据出错，查日志看情况</string>
+    <string name="fengyu_fail_net">获取云图记录失败</string>
     <string name="operation_complete">操作成功</string>
     <string name="cancel">取消</string>
     <string name="confirm">确定</string>

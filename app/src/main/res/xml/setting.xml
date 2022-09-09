@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory android:title="@string/action_settings">
+        <EditTextPreference
+            android:defaultValue="ShenZhen"
+            android:key="city"
+            android:summary="@string/city_setting"
+            android:title="天气城市设置" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="fengyu"
+            android:summary="更新数据时下载最新云图，没流量时可关"
+            android:title="云图下载" />
+    </PreferenceCategory>
+</PreferenceScreen>
