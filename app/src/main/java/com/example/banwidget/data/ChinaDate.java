@@ -39,7 +39,7 @@ public class ChinaDate {
             0, 1, 0};
     final private static int[] year2000 = new int[]{0, 3, 1, 2, 1, 2, 1, 1,
             2, 1, 2, 1};
-    public final static String[] nStr1 = new String[]{"", "正", "二", "三", "四",
+    public final static String[] nStr1 = new String[]{"闰", "正", "二", "三", "四",
             "五", "六", "七", "八", "九", "十", "冬", "腊"};
     private final static String[] Gan = new String[]{"甲", "乙", "丙", "丁", "戊",
             "己", "庚", "辛", "壬", "癸"};
@@ -337,6 +337,10 @@ public class ChinaDate {
             // sToday.append('(');
             // sToday.append(AnimalsYear(year));
             // sToday.append(")年");
+            int m = leapMonth((int) l[0]);
+            if (m == l[1]) {
+                sToday.append(nStr1[0]);
+            }
             sToday.append(nStr1[(int) l[1]]);
             if (l[1] != 12 || l[1] != 11) {
                 sToday.append("月");
@@ -477,7 +481,7 @@ public class ChinaDate {
         while (true) {
             tempC += s_stAccInfo2[i];
             tempCalendar.setTime(new Date(tempC * 1000));
-           // System.out.println(format.format(new Date(tempCalendar.getTimeInMillis())) + " " + solarTerm[i]);
+            // System.out.println(format.format(new Date(tempCalendar.getTimeInMillis())) + " " + solarTerm[i]);
             if (isSomeDay(calendar, tempCalendar)) {
                 return solarTerm[i];
             } else {

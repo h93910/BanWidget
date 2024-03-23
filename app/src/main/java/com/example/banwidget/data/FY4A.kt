@@ -39,7 +39,7 @@ class FY4A constructor(conText: Context) {
     private val bitmapSet = arrayOfNulls<Bitmap>(4 * 4)
     private var glide = Glide.with(context).asBitmap().skipMemoryCache(true)
         .diskCacheStrategy(DiskCacheStrategy.NONE)
-    private val HOST = "https://3xacxxx.de"
+    private val HOST = "http://195.58.49.60:80"
 
     init {
         PATH = getSecondaryStoragePath() + "/Ban/" + conText.getString(R.string.app_name)
